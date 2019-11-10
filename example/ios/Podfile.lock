@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_radio_player (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `.symlinks/flutter/ios-release`)
+  - flutter_radio_player (from `.symlinks/plugins/flutter_radio_player/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: ".symlinks/flutter/ios-release"
+  flutter_radio_player:
+    :path: ".symlinks/plugins/flutter_radio_player/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_radio_player: fadb3aabe7d624be49e484af4d884f61973ea668
+
+PODFILE CHECKSUM: 04c2f3a6a16e3d9ed4bc91015ae507e4062c796a
+
+COCOAPODS: 1.8.4
