@@ -40,10 +40,13 @@ android {
 }
 
 dependencies {
+    implementation "androidx.media:media:1.1.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.anko:anko-commons:$anko_version"
+
+    // third party
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation 'com.google.android.exoplayer:exoplayer:2.10.5'
-    implementation "org.jetbrains.anko:anko-commons:$anko_version"
-    implementation "androidx.media:media:1.1.0"
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.10.5'
 
 }
