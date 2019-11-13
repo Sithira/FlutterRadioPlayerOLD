@@ -30,6 +30,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name="me.sithiramunasinghe.flutter_radio_player.player.RadioService"></service>
+        <service android:name="me.sithiramunasinghe.flutter_radio_player.player.old.RadioService"></service>
     </application>
 </manifest>

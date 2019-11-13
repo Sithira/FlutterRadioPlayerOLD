@@ -1,4 +1,4 @@
-package me.sithiramunasinghe.flutter_radio_player.player
+package me.sithiramunasinghe.flutter_radio_player.player.old
 
 object PlaybackStatus {
 
