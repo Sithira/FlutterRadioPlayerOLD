@@ -3,8 +3,12 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_radio_player/flutter_radio_player.dart';
+import 'package:flutter_radio_player/models/RadioPlayerListener.dart';
+import 'package:flutter_radio_player/enums/PlayerSate.dart';
 
 void main() => runApp(MyApp());
+
+
 
 class MyApp extends StatefulWidget {
   @override
@@ -12,32 +16,44 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  Duration audioLength = Duration(milliseconds: 0);
+  Duration audioPosition = Duration(milliseconds: 0);
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+
+    RadioPlayerListener listener = RadioPlayerListener(
+        onPlayerStateChanged: (PlayerSate playerState) {
+          if (playerState == PlayerSate.IDLE) {
+            setState(() {
+              audioLength = Duration(milliseconds: 0);
+              audioPosition = Duration(milliseconds: 0);
+            });
+          } else {
+            // setAudioLength();
+          }
+        },
+        onPlayerPositionChanged: (Duration playerPosition) {
+          setState(() {
+            audioPosition = playerPosition;
+          });
+        },
+        onPlayerCompleted: () {
+          print("Player completed");
+          audioPosition = Duration(milliseconds: 0);
+          audioLength = Duration(milliseconds: 0);
+        }
+    );
+
+    FlutterRadioPlayer.setListeners(listener);
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await FlutterRadioPlayer.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
+  @override
+  void dispose() {
+    super.dispose();
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+    FlutterRadioPlayer.unbind();
   }
 
   @override
@@ -45,10 +61,56 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Sakwala FM'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              RaisedButton(
+                child: Text("Connect to service, load audio, start playback"),
+                onPressed: () async {
+                  await FlutterRadioPlayer.init(
+                    "Sakwala FM",
+                    "Live Radio",
+                    "http://149.56.147.197:8173/stream",
+                    "ic_launcher",  // IMPORTANT!
+                    "app_icon",     // see README for details about usage
+                  );
+                  setState(() {
+
+                  });
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.play_arrow),
+                    onPressed: () async {
+                      await FlutterRadioPlayer.resume();
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.pause),
+                    onPressed: () async {
+                      await FlutterRadioPlayer.pause();
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.stop),
+                    onPressed: () async {
+                      await FlutterRadioPlayer.stop();
+                      setState(() {
+                        audioLength = Duration(milliseconds: 0);
+                        audioPosition = Duration(milliseconds: 0);
+                      });
+                    },
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

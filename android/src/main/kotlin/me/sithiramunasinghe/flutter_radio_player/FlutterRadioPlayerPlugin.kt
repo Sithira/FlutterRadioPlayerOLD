@@ -1,6 +1,8 @@
 package me.sithiramunasinghe.flutter_radio_player
 
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import io.flutter.plugin.common.MethodCall
@@ -8,33 +10,115 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
+import me.sithiramunasinghe.flutter_radio_player.player.RadioPlayerService
 
-class FlutterRadioPlayerPlugin: MethodCallHandler {
 
-  companion object {
-    @JvmStatic
-    fun registerWith(registrar: Registrar) {
-      val channel = MethodChannel(registrar.messenger(), "flutter_radio_player")
-      channel.setMethodCallHandler(FlutterRadioPlayerPlugin())
+class FlutterRadioPlayerPlugin : MethodCallHandler {
+
+    companion object {
+        @JvmStatic
+        fun registerWith(registrar: Registrar) {
+            val channel = MethodChannel(registrar.messenger(), "flutter_radio_player")
+            channel.setMethodCallHandler(FlutterRadioPlayerPlugin())
+
+            pluginRegistrar = registrar
+            context = pluginRegistrar?.activeContext()
+            serviceIntent = Intent(context, RadioPlayerService::class.java)
+        }
+
+        // static members
+        var pluginRegistrar: Registrar? = null
+        var context: Context? = null
+        var methodChannel: MethodChannel? = null
+        var radioPlayerService: RadioPlayerService? = null
+        var isBound = false
+        var serviceIntent: Intent? = null
+        var plugin: FlutterRadioPlayerPlugin? = null
+
     }
-  }
 
-  override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+    override fun onMethodCall(call: MethodCall, result: Result) {
+
+        println("onMethodCall --> " + call.method)
+
+        when(call.method) {
+            "getPlatformVersion" -> {
+                result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            }
+            "startService" -> {
+                val title = call.argument<String>("title")
+                val channel = call.argument<String>("channel")
+                val url = call.argument<String>("url")
+                val smallIcon = call.argument<String>("appIcon")
+                val bigIcon = call.argument<String>("albumCover")
+
+                if (radioPlayerService != null) {
+
+                    if (radioPlayerService?.streamURL != url) {
+                        serviceIntent?.putExtra("title", title)
+                        serviceIntent?.putExtra("channel", channel)
+                        serviceIntent?.putExtra("url", url)
+                        context?.startService(serviceIntent)
+                        result.success(null)
+                    }
+                } else {
+                    serviceIntent?.putExtra("title", title)
+                    serviceIntent?.putExtra("channel", channel)
+                    serviceIntent?.putExtra("url", url)
+                    context?.startService(serviceIntent)
+                    result.success(null)
+                }
+
+                println("Radio Player: $radioPlayerService")
+
+            }
+            "stop" -> {
+                if (radioPlayerService != null) {
+                    context?.unbindService(serviceConnection)
+                    radioPlayerService?.stopService()
+                    result.success(null)
+                }
+            }
+            "pause" -> {
+                if (radioPlayerService != null) {
+                    radioPlayerService?.pauseAudio()
+                    result.success(null)
+                }
+            }
+            "resume" -> {
+                if (radioPlayerService != null) {
+                    radioPlayerService?.resumeAudio()
+                    result.success(null)
+                }
+            }
+            "unbind" -> {
+                if (radioPlayerService != null) {
+                    context?.unbindService(serviceConnection)
+                    result.success(null)
+                }
+            }
+            "caseIfBound" -> {
+                if (radioPlayerService != null) {
+                    context?.bindService(serviceIntent, serviceConnection, Context.BIND_IMPORTANT)
+                    result.success(null)
+                }
+            }
+            else -> result.notImplemented()
+        }
+
     }
-  }
 
-  val serviceConnection = object : ServiceConnection {
-    override fun onServiceDisconnected(name: ComponentName?) {
-      TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    val serviceConnection = object : ServiceConnection {
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+            radioPlayerService = null
+        }
+
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            val localBinder = binder as RadioPlayerService.LocalBinder
+            radioPlayerService = localBinder.service
+            isBound = true
+        }
+
     }
-
-    override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-      TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-  }
 }

@@ -26,8 +26,8 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.util.Util.getUserAgent
+import me.sithiramunasinghe.flutter_radio_player.FlutterRadioPlayerPlugin.Companion.methodChannel
 import me.sithiramunasinghe.flutter_radio_player.R
-
 
 class RadioPlayerService : Service() {
 
@@ -50,7 +50,7 @@ class RadioPlayerService : Service() {
     private val mediaSessionId = "flutter_radio_radio_media_session"
 
     // stream URL
-    private var streamURL: String? = null
+    var streamURL: String? = null
 
     inner class LocalBinder : Binder() {
         internal val service: RadioPlayerService
@@ -93,25 +93,24 @@ class RadioPlayerService : Service() {
 
         val playerEvents = object : Player.EventListener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                if (playbackState == SimpleExoPlayer.STATE_IDLE) {
-                    //methodChannel.invokeMethod("onPlayerStateChanged", "idle")
-                } else if (playbackState == SimpleExoPlayer.STATE_BUFFERING) {
-                    //methodChannel.invokeMethod("onPlayerStateChanged", "buffering")
+                when {
+                    playbackState == SimpleExoPlayer.STATE_IDLE -> methodChannel?.invokeMethod("onPlayerStateChanged", "idle")
+                    playbackState == SimpleExoPlayer.STATE_BUFFERING -> methodChannel?.invokeMethod("onPlayerStateChanged", "buffering")
                     // add buffering string
-                } else if (playbackState == SimpleExoPlayer.STATE_ENDED) {
-                    //methodChannel.invokeMethod("onPlayerCompleted", null)
-                    //methodChannel.invokeMethod("onPlayerStateChanged", "idle")
-                    stopSelf()
-                } else if (playWhenReady) {
-                    //methodChannel.invokeMethod("onPlayerStateChanged", "playing")
+                    playbackState == SimpleExoPlayer.STATE_ENDED -> {
+                        //methodChannel.invokeMethod("onPlayerCompleted", null)
+                        methodChannel?.invokeMethod("onPlayerStateChanged", "idle")
+                        stopSelf()
+                    }
+                    playWhenReady -> methodChannel?.invokeMethod("onPlayerStateChanged", "playing")
                     // add playing
-                } else {
-                    // methodChannel.invokeMethod("onPlayerStateChanged", "paused")
+                    else -> methodChannel?.invokeMethod("onPlayerStateChanged", "paused")
                     // add paused
                 }
             }
         }
 
+        // set exo player configs
         player?.let {
             it.addListener(playerEvents)
             it.playWhenReady = true
@@ -207,6 +206,19 @@ class RadioPlayerService : Service() {
                 throw IllegalStateException("Unsupported type: $type")
             }
         }
+    }
+
+
+    fun pauseAudio() {
+        player?.playWhenReady = false
+    }
+
+    fun resumeAudio() {
+        player?.playWhenReady = true
+    }
+
+    fun stopService() {
+        stopSelf()
     }
 
 }
