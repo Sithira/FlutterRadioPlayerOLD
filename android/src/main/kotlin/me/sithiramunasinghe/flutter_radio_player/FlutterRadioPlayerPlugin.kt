@@ -11,6 +11,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import me.sithiramunasinghe.flutter_radio_player.player.RadioPlayerService
+import android.util.Log;
 
 
 class FlutterRadioPlayerPlugin : MethodCallHandler {
@@ -30,16 +31,16 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
         var pluginRegistrar: Registrar? = null
         var context: Context? = null
         var methodChannel: MethodChannel? = null
+
         var radioPlayerService: RadioPlayerService? = null
         var isBound = false
         var serviceIntent: Intent? = null
-        var plugin: FlutterRadioPlayerPlugin? = null
+
+        const val TAG: String = "FlutterRadioPlayerPlgin"
 
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-
-        println("onMethodCall --> " + call.method)
 
         when(call.method) {
             "getPlatformVersion" -> {
@@ -55,41 +56,44 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                 if (radioPlayerService != null) {
 
                     if (radioPlayerService?.streamURL != url) {
+                        radioPlayerService?.stopService()
                         serviceIntent?.putExtra("title", title)
                         serviceIntent?.putExtra("channel", channel)
                         serviceIntent?.putExtra("url", url)
                         context?.startService(serviceIntent)
-                        result.success(null)
+                    } else {
+                        Log.d(TAG, "Player is already playing..")
                     }
                 } else {
                     serviceIntent?.putExtra("title", title)
                     serviceIntent?.putExtra("channel", channel)
                     serviceIntent?.putExtra("url", url)
                     context?.startService(serviceIntent)
-                    result.success(null)
                 }
 
-                println("Radio Player: $radioPlayerService")
+                result.success(null)
 
             }
             "stop" -> {
                 if (radioPlayerService != null) {
                     context?.unbindService(serviceConnection)
                     radioPlayerService?.stopService()
-                    result.success(null)
                 }
+                result.success(null)
             }
             "pause" -> {
                 if (radioPlayerService != null) {
                     radioPlayerService?.pauseAudio()
-                    result.success(null)
                 }
+                result.success(null)
             }
             "resume" -> {
+
                 if (radioPlayerService != null) {
                     radioPlayerService?.resumeAudio()
-                    result.success(null)
                 }
+
+                result.success(null)
             }
             "unbind" -> {
                 if (radioPlayerService != null) {
@@ -97,18 +101,18 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                     result.success(null)
                 }
             }
-            "caseIfBound" -> {
-                if (radioPlayerService != null) {
+            "checkIfBound" -> {
+                if (!isBound) {
                     context?.bindService(serviceIntent, serviceConnection, Context.BIND_IMPORTANT)
-                    result.success(null)
                 }
+                result.success(null)
             }
             else -> result.notImplemented()
         }
 
     }
 
-    val serviceConnection = object : ServiceConnection {
+    private val serviceConnection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
             isBound = false
             radioPlayerService = null

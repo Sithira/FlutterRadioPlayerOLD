@@ -3,6 +3,7 @@ package me.sithiramunasinghe.flutter_radio_player.player
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -13,6 +14,7 @@ import android.os.Build
 import android.os.IBinder
 import android.support.annotation.Nullable
 import android.support.v4.media.session.MediaSessionCompat
+import androidx.core.app.NotificationCompat
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
@@ -28,8 +30,10 @@ import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.util.Util.getUserAgent
 import me.sithiramunasinghe.flutter_radio_player.FlutterRadioPlayerPlugin.Companion.methodChannel
 import me.sithiramunasinghe.flutter_radio_player.R
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-class RadioPlayerService : Service() {
+class RadioPlayerService : Service(), AnkoLogger {
 
     private var isBound = false
 
@@ -166,7 +170,7 @@ class RadioPlayerService : Service() {
                 object : PlayerNotificationManager.NotificationListener {
                     override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
                         isBound = false
-                        // audioService = null
+                        player = null
                         stopSelf()
                     }
 
@@ -184,8 +188,14 @@ class RadioPlayerService : Service() {
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector?.setPlayer(player)
 
+
+        playerNotificationManager.setUseStopAction(true)
+        playerNotificationManager.setFastForwardIncrementMs(0)
+        playerNotificationManager.setRewindIncrementMs(0)
         playerNotificationManager.setUsePlayPauseActions(true)
         playerNotificationManager.setUseNavigationActions(false)
+        playerNotificationManager.setUseNavigationActionsInCompactView(false)
+
         playerNotificationManager.setPlayer(player)
         playerNotificationManager.setMediaSessionToken(mediaSession.sessionToken)
 
@@ -210,14 +220,17 @@ class RadioPlayerService : Service() {
 
 
     fun pauseAudio() {
+        info { "pausing audio..." }
         player?.playWhenReady = false
     }
 
     fun resumeAudio() {
+        info { "resuming audio" }
         player?.playWhenReady = true
     }
 
     fun stopService() {
+        info { "stopping services" }
         stopSelf()
     }
 
