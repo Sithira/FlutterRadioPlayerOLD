@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:flutter_radio_player/flutter_radio_player.dart';
-import 'package:flutter_radio_player/models/RadioPlayerListener.dart';
-import 'package:flutter_radio_player/enums/PlayerSate.dart';
 
 void main() => runApp(MyApp());
-
-
 
 class MyApp extends StatefulWidget {
   @override
@@ -16,37 +9,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Duration audioLength = Duration(milliseconds: 0);
-  Duration audioPosition = Duration(milliseconds: 0);
-
   @override
   void initState() {
     super.initState();
-
-    RadioPlayerListener listener = RadioPlayerListener(
-        onPlayerStateChanged: (PlayerSate playerState) {
-          if (playerState == PlayerSate.IDLE) {
-            setState(() {
-              audioLength = Duration(milliseconds: 0);
-              audioPosition = Duration(milliseconds: 0);
-            });
-          } else {
-            // setAudioLength();
-          }
-        },
-        onPlayerPositionChanged: (Duration playerPosition) {
-          setState(() {
-            audioPosition = playerPosition;
-          });
-        },
-        onPlayerCompleted: () {
-          print("Player completed");
-          audioPosition = Duration(milliseconds: 0);
-          audioLength = Duration(milliseconds: 0);
-        }
-    );
-
-    FlutterRadioPlayer.setListeners(listener);
   }
 
   @override
@@ -77,9 +42,6 @@ class _MyAppState extends State<MyApp> {
                     "ic_launcher",  // IMPORTANT!
                     "app_icon",     // see README for details about usage
                   );
-                  setState(() {
-
-                  });
                 },
               ),
               Row(
@@ -101,10 +63,6 @@ class _MyAppState extends State<MyApp> {
                     icon: Icon(Icons.stop),
                     onPressed: () async {
                       await FlutterRadioPlayer.stop();
-                      setState(() {
-                        audioLength = Duration(milliseconds: 0);
-                        audioPosition = Duration(milliseconds: 0);
-                      });
                     },
                   ),
                 ],

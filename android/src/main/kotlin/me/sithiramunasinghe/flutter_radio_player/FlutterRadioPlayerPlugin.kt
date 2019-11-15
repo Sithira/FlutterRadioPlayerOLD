@@ -5,13 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.util.Log
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import me.sithiramunasinghe.flutter_radio_player.player.RadioPlayerService
-import android.util.Log;
 
 
 class FlutterRadioPlayerPlugin : MethodCallHandler {
@@ -30,7 +30,6 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
         // static members
         var pluginRegistrar: Registrar? = null
         var context: Context? = null
-        var methodChannel: MethodChannel? = null
 
         var radioPlayerService: RadioPlayerService? = null
         var isBound = false
@@ -42,7 +41,7 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: Result) {
 
-        when(call.method) {
+        when (call.method) {
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
@@ -106,6 +105,9 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                     context?.bindService(serviceIntent, serviceConnection, Context.BIND_IMPORTANT)
                 }
                 result.success(null)
+            }
+            "isPlaying" -> {
+                result.success(radioPlayerService?.isPlaying())
             }
             else -> result.notImplemented()
         }
