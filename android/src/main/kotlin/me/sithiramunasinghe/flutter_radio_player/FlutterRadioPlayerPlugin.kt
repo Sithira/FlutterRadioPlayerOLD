@@ -13,7 +13,6 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import me.sithiramunasinghe.flutter_radio_player.player.RadioPlayerService
 
-
 class FlutterRadioPlayerPlugin : MethodCallHandler {
 
     companion object {
@@ -77,6 +76,7 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
 
             }
             "stop" -> {
+                Log.d(TAG, "stop service invoked")
                 if (radioPlayerService != null) {
                     context?.unbindService(serviceConnection)
                     radioPlayerService?.stopService()
@@ -84,13 +84,14 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                 result.success(null)
             }
             "pause" -> {
+                Log.d(TAG, "pause service invoked")
                 if (radioPlayerService != null) {
                     radioPlayerService?.pauseAudio()
                 }
                 result.success(null)
             }
             "resume" -> {
-
+                Log.d(TAG, "resume service invoked")
                 if (radioPlayerService != null) {
                     radioPlayerService?.resumeAudio()
                 }
@@ -98,20 +99,21 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                 result.success(null)
             }
             "unbind" -> {
+                Log.d(TAG, "unbind service invoked")
                 if (radioPlayerService != null) {
                     context?.unbindService(serviceConnection)
                     result.success(null)
                 }
             }
             "checkIfBound" -> {
-                Log.d(TAG, "Checking if bound")
+                Log.d(TAG, "checking bound service invoked")
                 if (!isBound) {
-                    Log.d(TAG, "binding now")
                     context?.bindService(serviceIntent, serviceConnection, Context.BIND_IMPORTANT)
                 }
                 result.success(null)
             }
             "isPlaying" -> {
+                Log.d(TAG, "is playing service invoked")
                 result.success(radioPlayerService?.isPlaying())
             }
             else -> result.notImplemented()
