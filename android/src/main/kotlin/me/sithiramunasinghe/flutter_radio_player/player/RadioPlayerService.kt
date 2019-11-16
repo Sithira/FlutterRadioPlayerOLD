@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.graphics.Bitmap
+import android.media.AudioManager
 import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Binder
@@ -28,7 +29,7 @@ import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class RadioPlayerService : Service(), AnkoLogger {
+class RadioPlayerService : Service(), AudioManager.OnAudioFocusChangeListener, AnkoLogger {
 
     private var isBound = false
 
@@ -71,10 +72,6 @@ class RadioPlayerService : Service(), AnkoLogger {
         playerNotificationManager?.setPlayer(null)
         player?.release()
         player = null
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return iBinder
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -208,6 +205,37 @@ class RadioPlayerService : Service(), AnkoLogger {
         return START_STICKY
     }
 
+    override fun onBind(intent: Intent?): IBinder? {
+        return iBinder
+    }
+
+    override fun onAudioFocusChange(audioFocus: Int) {
+        when (audioFocus) {
+
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                player?.volume = 0.8f
+                resumeAudio()
+            }
+
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                stopAudio()
+            }
+
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                if (isPlaying()) {
+                    stopAudio()
+                }
+            }
+
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                if (isPlaying()) {
+                    player?.volume = 0.1f
+                }
+            }
+        }
+    }
+
+
     /**
      * Build the media source depending of the URL content type.
      */
@@ -235,8 +263,8 @@ class RadioPlayerService : Service(), AnkoLogger {
         player?.playWhenReady = true
     }
 
-    fun stopService() {
-        info { "stopping services $player" }
+    fun stopAudio() {
+        info { "stopping audio $player" }
         player?.stop()
     }
 

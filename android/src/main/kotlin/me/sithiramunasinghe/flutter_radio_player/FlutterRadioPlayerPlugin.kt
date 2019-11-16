@@ -57,7 +57,7 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                 if (radioPlayerService != null) {
 
                     if (radioPlayerService?.streamURL != url) {
-                        radioPlayerService?.stopService()
+                        radioPlayerService?.stopAudio()
                         serviceIntent?.putExtra("title", title)
                         serviceIntent?.putExtra("channel", channel)
                         serviceIntent?.putExtra("url", url)
@@ -79,7 +79,7 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                 Log.d(TAG, "stop service invoked")
                 if (radioPlayerService != null) {
                     context?.unbindService(serviceConnection)
-                    radioPlayerService?.stopService()
+                    radioPlayerService?.stopAudio()
                 }
                 result.success(null)
             }
