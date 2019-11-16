@@ -16,7 +16,6 @@ class RadioPlayerService {
     static var player: AVPlayer = AVPlayer()
     static var playerItem: AVPlayerItem?
     
-    
     /**
      Starts the RadioPlayerService
      
@@ -83,6 +82,8 @@ class RadioPlayerService {
             commandCenter.likeCommand.isEnabled = false
             commandCenter.dislikeCommand.isEnabled = false
             commandCenter.bookmarkCommand.isEnabled = false
+            commandCenter.changeRepeatModeCommand.isEnabled = false
+            commandCenter.changeShuffleModeCommand.isEnabled = false
             
             // only available in iOS 9
             if #available(iOS 9.0, *) {
@@ -90,37 +91,36 @@ class RadioPlayerService {
                 commandCenter.disableLanguageOptionCommand.isEnabled = false
             }
             
-            commandCenter.changeRepeatModeCommand.isEnabled = false
-            commandCenter.changeShuffleModeCommand.isEnabled = false
-            
+            // control center play button callback
             commandCenter.playCommand.addTarget { (MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus in
                 print("command center play command...")
                 self._play()
                 return .success
             }
             
+            // control center pause button callback
             commandCenter.pauseCommand.addTarget { (MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus in
                 print("command center pause command...")
                 self._pause()
                 return .success
             }
             
+            // control center stop button callback
             commandCenter.stopCommand.addTarget { (MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus in
                 print("command center stop command...")
                 self.stop()
                 return .success
             }
             
+            // create audio session for background playback and control center callbacks.
             let audioSession = AVAudioSession.sharedInstance()
             
-            do {
-                if #available(iOS 10.0, *) {
-                    try audioSession.setCategory(AVAudioSessionCategoryPlayback, mode: AVAudioSessionCategoryAmbient, options: AVAudioSessionCategoryOptions.mixWithOthers)
-                    try audioSession.overrideOutputAudioPort(.none)
-                    try audioSession.setActive(true)
-                }
+            if #available(iOS 10.0, *) {
+                try audioSession.setCategory(AVAudioSessionCategoryPlayback, mode: AVAudioSessionCategoryAmbient, options: AVAudioSessionCategoryOptions.mixWithOthers)
+                try audioSession.overrideOutputAudioPort(.none)
+                try audioSession.setActive(true)
             }
-            
+
             UIApplication.shared.beginReceivingRemoteControlEvents()
         } catch {
             print("Something went wrong !")
