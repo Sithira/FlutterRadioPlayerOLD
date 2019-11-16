@@ -15,7 +15,7 @@ class RadioPlayerService {
     
     static var player: AVPlayer = AVPlayer()
     static var playerItem: AVPlayerItem?
-
+    
     
     /**
      Starts the RadioPlayerService
@@ -111,10 +111,15 @@ class RadioPlayerService {
                 return .success
             }
             
-            let avAudioSession = AVAudioSession.sharedInstance()
+            let audioSession = AVAudioSession.sharedInstance()
             
-            try avAudioSession.setActive(true)
-            try avAudioSession.setCategory(AVAudioSession.Category.playback)
+            do {
+                if #available(iOS 10.0, *) {
+                    try audioSession.setCategory(AVAudioSessionCategoryPlayback, mode: AVAudioSessionCategoryAmbient, options: AVAudioSessionCategoryOptions.mixWithOthers)
+                    try audioSession.overrideOutputAudioPort(.none)
+                    try audioSession.setActive(true)
+                }
+            }
             
             UIApplication.shared.beginReceivingRemoteControlEvents()
         } catch {

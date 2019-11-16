@@ -46,6 +46,9 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             "startService" -> {
+
+                Log.d(TAG, "start service invoked")
+
                 val title = call.argument<String>("title")
                 val channel = call.argument<String>("channel")
                 val url = call.argument<String>("url")
@@ -101,7 +104,9 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
                 }
             }
             "checkIfBound" -> {
+                Log.d(TAG, "Checking if bound")
                 if (!isBound) {
+                    Log.d(TAG, "binding now")
                     context?.bindService(serviceIntent, serviceConnection, Context.BIND_IMPORTANT)
                 }
                 result.success(null)
