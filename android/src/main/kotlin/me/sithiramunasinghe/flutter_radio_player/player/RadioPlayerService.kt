@@ -23,6 +23,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.util.Util.getUserAgent
+import me.sithiramunasinghe.flutter_radio_player.FlutterRadioPlayerPlugin.Companion.pluginRegistrar
 import me.sithiramunasinghe.flutter_radio_player.R
 import me.sithiramunasinghe.flutter_radio_player.player.enums.PlaybackStatus
 import org.greenrobot.eventbus.EventBus
@@ -137,11 +138,9 @@ class RadioPlayerService : Service(), AudioManager.OnAudioFocusChangeListener, A
 
                     @Nullable
                     override fun createCurrentContentIntent(player: Player): PendingIntent? {
-                        /*
-                        Intent intent = new Intent(context, MainActivity.class);
-                        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        */
-                        return null
+                        return PendingIntent.getActivity(context, 0,
+                                pluginRegistrar?.activity()?.intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT)
                     }
 
                     @Nullable

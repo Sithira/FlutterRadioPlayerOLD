@@ -1,4 +1,4 @@
-# flutter_radio_player_example
+# Flutter radio player - Example usage
 
 Demonstrates how to use the flutter_radio_player plugin.
 
