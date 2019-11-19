@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.AudioManager
 import android.media.session.MediaSession
 import android.net.Uri
@@ -154,17 +155,13 @@ class RadioPlayerService : Service(), AudioManager.OnAudioFocusChangeListener, A
                             null
                         } else {
 
-                            // todo: plugin reg
-//                            val resourceId = pluginRegistrar.context().getResources().getIdentifier(
-//                                    intent.getStringExtra("bigIcon"),
-//                                    "drawable",
-//                                    pluginRegistrar.context().getPackageName())
-//                            BitmapFactory.decodeResource(
-//                                    pluginRegistrar.context().getResources(),
-//                                    resourceId
-//                            )
+                            val resourceId = pluginRegistrar?.context()?.resources?.getIdentifier(
+                                    intent.getStringExtra("bigIcon"),
+                                    "drawable",
+                                    pluginRegistrar?.context()?.packageName)
 
-                            return null
+                            return BitmapFactory
+                                    .decodeResource(pluginRegistrar?.context()?.resources, resourceId!!)
 
                         }
                     }
@@ -182,6 +179,14 @@ class RadioPlayerService : Service(), AudioManager.OnAudioFocusChangeListener, A
                 }
         )
 
+//        if (intent.getStringExtra("appIcon") != null) {
+//            val appIcon = pluginRegistrar?.context()?.resources!!.getIdentifier(
+//                    intent.getStringExtra("appIcon"),
+//                    "drawable",
+//                    pluginRegistrar?.context()?.packageName)
+//
+//            playerNotificationManager.setSmallIcon(appIcon)
+//        }
 
         val mediaSession = MediaSessionCompat(context, mediaSessionId)
         mediaSession.isActive = true

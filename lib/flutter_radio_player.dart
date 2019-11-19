@@ -12,15 +12,7 @@ class FlutterRadioPlayer {
   }
 
   /// Initializes Services, Binds Audio and Starts audio playback.
-  static Future<void> init(String title, String channel, String url,
-      String albumCover, String appIcon) async {
-    String checkIfNull(String toCheck) {
-      if (toCheck == null) {
-        return "theGivenResourceIsNull";
-      } else {
-        return toCheck;
-      }
-    }
+  static Future<void> init(String title, String channel, String url, String albumCover, String appIcon) async {
 
     await checkIfBound();
 
@@ -28,9 +20,10 @@ class FlutterRadioPlayer {
       "title": title,
       "channel": channel,
       "url": url,
-      "albumCover": checkIfNull(albumCover),
-      "appIcon": checkIfNull(appIcon),
+      "albumCover": appIcon,
+      "appIcon": appIcon,
     });
+
   }
 
   /// Stops and unbinds audio instances.

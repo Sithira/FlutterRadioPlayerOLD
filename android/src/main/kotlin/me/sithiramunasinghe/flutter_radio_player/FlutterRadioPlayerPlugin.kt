@@ -11,6 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
+import me.sithiramunasinghe.flutter_radio_player.player.PlayerItem
 import me.sithiramunasinghe.flutter_radio_player.player.RadioPlayerService
 
 class FlutterRadioPlayerPlugin : MethodCallHandler {
@@ -48,27 +49,26 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
 
                 Log.d(TAG, "start service invoked")
 
+                // todo: move to private method.
                 val title = call.argument<String>("title")
                 val channel = call.argument<String>("channel")
                 val url = call.argument<String>("url")
                 val smallIcon = call.argument<String>("appIcon")
                 val bigIcon = call.argument<String>("albumCover")
 
+                val playerItem = PlayerItem(title!!, channel!!, url!!, smallIcon!!, bigIcon!!)
+
                 if (radioPlayerService != null) {
 
                     if (radioPlayerService?.streamURL != url) {
                         radioPlayerService?.stopAudio()
-                        serviceIntent?.putExtra("title", title)
-                        serviceIntent?.putExtra("channel", channel)
-                        serviceIntent?.putExtra("url", url)
+                        serviceIntent = setIntentData(serviceIntent!!, playerItem)
                         context?.startService(serviceIntent)
                     } else {
                         Log.d(TAG, "Player is already playing..")
                     }
                 } else {
-                    serviceIntent?.putExtra("title", title)
-                    serviceIntent?.putExtra("channel", channel)
-                    serviceIntent?.putExtra("url", url)
+                    serviceIntent = setIntentData(serviceIntent!!, playerItem)
                     context?.startService(serviceIntent)
                 }
 
@@ -132,6 +132,14 @@ class FlutterRadioPlayerPlugin : MethodCallHandler {
             radioPlayerService = localBinder.service
             isBound = true
         }
+    }
 
+    private fun setIntentData(intent: Intent, playerItem: PlayerItem): Intent {
+        intent.putExtra("title", playerItem.title)
+        intent.putExtra("channel", playerItem.channel)
+        intent.putExtra("url", playerItem.url)
+        intent.putExtra("bigIcon", playerItem.albumCover)
+        intent.putExtra("appIcon", playerItem.appIcon)
+        return intent
     }
 }
